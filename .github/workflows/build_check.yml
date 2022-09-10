@@ -1,0 +1,26 @@
+name: Frontend Check
+
+on:
+  pull_request:
+    branches: [develop]
+
+defaults:
+  run:
+    working-directory: ./
+
+jobs:
+  Frontend-Build-Check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.2
+      - name: Use Node.js
+        uses: actions/setup-node@v3.4.1
+        with:
+          node-version: '16.x'
+      - run: yarn install
+      - run: CI=false yarn build
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}

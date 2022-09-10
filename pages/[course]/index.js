@@ -93,7 +93,7 @@ function Event({ name, id, date, course }) {
       <div className="shadow-md rounded-md flex flex-row max-h-full hover:bg-slate-100 cursor-pointer transition-all ease-linear">
         <div className="bg-sky-800 w-1.5 rounded-l-md"></div>
         <div className="p-3 flex-grow">
-          📗 {date} - {name}
+          📝 {date} - {name}
         </div>
       </div>
     </Link>

@@ -37,7 +37,7 @@ export default function Event({ event, course, id }) {
     } else {
       setStatus(closedStatus);
     }
-  }, [initStatus, closedStatus, event.status]);
+  }, [event.status]);
 
   function setStatus({ color, heading, content }) {
     setColor(color);

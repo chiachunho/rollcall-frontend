@@ -6,7 +6,7 @@ export default function MainCard({ children, leftContent }) {
       <div className="w-full md:w-5/12 bg-sky-800 text-center min-h-full rounded-t-lg md:rounded-l-lg md:rounded-tr-none flex flex-col p-6">
         <div className="p-6 flex items-center justify-center flex-grow">
           <div className="p-6 bg-white rounded-full aspect-square leading-[0] shadow-lg">
-            <Image src="/ntust_logo.png" height="100%" width="100%" className=" rounded-full"></Image>
+            <Image src="/ntust_logo.png" height="100%" width="100%" className=" rounded-full" alt="ntust_logo"></Image>
           </div>
         </div>
         <div className="text-white space-y-3">{leftContent}</div>

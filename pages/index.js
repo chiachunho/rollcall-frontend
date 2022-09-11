@@ -55,8 +55,17 @@ export async function getServerSideProps({ req, res }) {
 
   if (session) {
     axiosInstance.defaults.headers.common['Authorization'] = 'JWT ' + session.accessToken;
-    const response = await axiosInstance.get(`courses/`);
-    return { props: { courses: response.data } };
+    try {
+      const response = await axiosInstance.get(`courses/`);
+      return { props: { courses: response.data } };
+    } catch (e) {
+      return {
+        redirect: {
+          destination: '/api/auth/signin',
+          permanent: false,
+        },
+      };
+    }
   }
 
   return {

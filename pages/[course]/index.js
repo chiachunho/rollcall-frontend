@@ -102,9 +102,17 @@ function Event({ name, id, date, course }) {
 
 export async function getServerSideProps({ params }) {
   const { course } = params;
-  const res = await axiosInstance.get(`courses/${course}/`);
-
-  return { props: { course: res.data } };
+  try {
+    const res = await axiosInstance.get(`courses/${course}/`);
+    return { props: { course: res.data } };
+  } catch (e) {
+    return {
+      redirect: {
+        destination: '/api/auth/signin',
+        permanent: false,
+      },
+    };
+  }
 }
 
 Course.auth = true;

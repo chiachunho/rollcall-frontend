@@ -18,12 +18,11 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     const session = await getSession();
 
-    console.error(error);
     // handle network error first
     if (error.response) {
       if (error.message === 'Network Error') {
         if (typeof window === 'undefined') {
-          throw new CustomError(); //Throw custom error here
+          throw 'Network Error'; //Throw custom error here
         } else {
           if (window.location.pathname !== '/networkError/') {
             window.location.href = `/networkError/?next=${router.pathname}`;
@@ -35,7 +34,7 @@ axiosInstance.interceptors.response.use(
       // Prevent infinite loops
       if (error.response.status === 401 && originalRequest.url === 'auth/token/refresh/') {
         if (typeof window === 'undefined') {
-          throw new CustomError(); //Throw custom error here
+          throw 'Occur error'; //Throw custom error here
         } else {
           window.location.href = `/api/auth/signin/?next=${router.pathname}`;
         }
@@ -44,7 +43,7 @@ axiosInstance.interceptors.response.use(
       }
 
       if (error.response.data.code === 'token_not_valid' && error.response.status === 401) {
-        const refreshToken = session.refreshToken;
+        const refreshToken = session ? session.refreshToken : null;
 
         if (refreshToken) {
           const tokenParts = JSON.parse(atob(refreshToken.split('.')[1]));
@@ -73,13 +72,16 @@ axiosInstance.interceptors.response.use(
           }
         } else {
           console.error('Refresh token not available.');
-          localStorage.removeItem('username');
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          signOut({
-            redirect: true,
-            callbackUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth/signin`,
-          });
+
+          if (typeof window !== 'undefined') {
+            // Client-side-only code
+            signOut({
+              redirect: true,
+              callbackUrl: `${process.env.NEXT_PUBLIC_URL}/api/auth/signin`,
+            });
+          } else {
+            throw 'Refresh token not available.'; //Throw custom error here
+          }
         }
       }
     }

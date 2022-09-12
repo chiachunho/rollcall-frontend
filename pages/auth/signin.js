@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Result from '../../components/Result';
 import MainCard from '../../components/MainCard';
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function SignIn() {
   const router = useRouter();
@@ -54,6 +55,10 @@ export default function SignIn() {
 
   return (
     <>
+      <Head>
+        <title>登入｜學生證點名輔助系統</title>
+        <meta property="og:title" content="登入｜學生證點名輔助系統" />
+      </Head>
       <MainCard
         leftContent={<h1 className="text-white font-medium text-2xl m-3 tracking-wider">學生證點名輔助系統</h1>}
       >

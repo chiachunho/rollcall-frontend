@@ -5,6 +5,7 @@ import Layout from '../../layouts/Layout';
 import MainCard from '../../components/MainCard';
 import SideList from '../../components/SideList';
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function Course({ course }) {
   const router = useRouter();
@@ -34,6 +35,10 @@ export default function Course({ course }) {
 
   return (
     <>
+      <Head>
+        <title>{course.name}｜學生證點名輔助系統</title>
+        <meta property="og:title" content={`${course.name}｜學生證點名輔助系統`} />
+      </Head>
       <MainCard
         leftContent={
           <>
@@ -102,9 +107,17 @@ function Event({ name, id, date, course }) {
 
 export async function getServerSideProps({ params }) {
   const { course } = params;
-  const res = await axiosInstance.get(`courses/${course}/`);
-
-  return { props: { course: res.data } };
+  try {
+    const res = await axiosInstance.get(`courses/${course}/`);
+    return { props: { course: res.data } };
+  } catch (e) {
+    return {
+      redirect: {
+        destination: '/api/auth/signin',
+        permanent: false,
+      },
+    };
+  }
 }
 
 Course.auth = true;

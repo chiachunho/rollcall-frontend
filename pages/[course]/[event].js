@@ -5,6 +5,7 @@ import axiosInstance from '../../components/axiosInstance';
 import Layout from '../../layouts/Layout';
 import MainCard from '../../components/MainCard';
 import SideList from '../../components/SideList';
+import Head from 'next/head';
 
 export default function Event({ event, course, id }) {
   const [color, setColor] = useState('bg-sky-800');
@@ -37,7 +38,7 @@ export default function Event({ event, course, id }) {
     } else {
       setStatus(closedStatus);
     }
-  }, []);
+  }, [event.status]);
 
   function setStatus({ color, heading, content }) {
     setColor(color);
@@ -61,7 +62,6 @@ export default function Event({ event, course, id }) {
       content: '該生未在選課資料中 (´･Д･)」',
     };
 
-    console.log(session);
     axiosInstance.defaults.headers.common['Authorization'] = 'JWT ' + session.accessToken;
 
     axiosInstance
@@ -79,7 +79,6 @@ export default function Event({ event, course, id }) {
         });
       })
       .catch((err) => {
-        console.error('error', err);
         setStatus(errorStatus);
 
         if (err.response) {
@@ -106,6 +105,12 @@ export default function Event({ event, course, id }) {
   };
   return (
     <>
+      <Head>
+        <title>
+          {event.name} - {event.course_name}｜學生證點名輔助系統
+        </title>
+        <meta property="og:title" content={`${event.name} - ${event.course_name}｜學生證點名輔助系統`} />
+      </Head>
       <MainCard
         leftContent={
           <>

@@ -3,6 +3,8 @@ import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+const APIbaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/';
+
 export const authOptions = {
   session: {
     jwt: true,
@@ -14,7 +16,7 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const res = await fetch('http://localhost:8000/auth/token/obtain/', {
+        const res = await fetch(`${APIbaseURL}auth/token/obtain/`, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: {
@@ -63,6 +65,9 @@ export const authOptions = {
       }
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth/signin',
   },
 };
 

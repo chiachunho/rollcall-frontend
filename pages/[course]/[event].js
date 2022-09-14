@@ -9,14 +9,15 @@ import Head from 'next/head';
 
 export default function Event({ event, course, id }) {
   const [color, setColor] = useState('bg-sky-800');
-  const [heading, setHeading] = useState('請刷學生證條碼 ⑉⑉⑉');
+  const [heading, setHeading] = useState('請輸入學號或感應學生證');
   const [content, setContent] = useState('僅限國立臺灣科技大學學生證');
   const [records, setRecords] = useState(event.records);
+  const [showStudent, setShowStudent] = useState(false);
   const { data: session } = useSession({ required: true });
 
   const initStatus = {
     color: 'bg-sky-800',
-    heading: '請刷學生證條碼 ⑉⑉⑉',
+    heading: '輸入學號或感應學生證',
     content: '僅限國立臺灣科技大學學生證',
   };
 
@@ -48,7 +49,8 @@ export default function Event({ event, course, id }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const student = event.target.stdID.value;
+    let student = event.target.student.value;
+    let key = event.target.key.value;
 
     const existStatus = {
       color: 'bg-yellow-400',
@@ -58,8 +60,8 @@ export default function Event({ event, course, id }) {
 
     const notEnrollStatus = {
       color: 'bg-yellow-400',
-      heading: `${student}，你是誰 😧`,
-      content: '該生未在選課資料中 (´･Д･)」',
+      heading: `${student}${student ? '，' : ''}你是誰 😧`,
+      content: `${student ? '該生' : '該卡'}未在選課資料中 (´･Д･)」${student ? '' : '，請嘗試將學生證綁定學號。'}`,
     };
 
     axiosInstance.defaults.headers.common['Authorization'] = 'JWT ' + session.accessToken;
@@ -67,6 +69,7 @@ export default function Event({ event, course, id }) {
     axiosInstance
       .post(`records/`, {
         student: student,
+        key: key,
         event: id,
         status: 'arrived',
       })
@@ -77,6 +80,7 @@ export default function Event({ event, course, id }) {
           heading: `嗨，${res.data.id_student} 👋🏻`,
           content: '簽到時間：' + new Date(res.data.created_at).toLocaleString('en-US', 'GMT+8'),
         });
+        setShowStudent(false);
       })
       .catch((err) => {
         setStatus(errorStatus);
@@ -91,16 +95,23 @@ export default function Event({ event, course, id }) {
               } else if (err.response.data.non_field_errors.includes('EVENT_CLOSED')) {
                 setStatus(closedStatus);
               }
+              setShowStudent(false);
             }
             if (err.response.data.student) {
               setStatus(notEnrollStatus);
+              setShowStudent(student === '');
             }
           }
         }
       })
       .finally(() => {
-        event.target.stdID.value = '';
-        event.target.stdID.focus();
+        if (!showStudent && event.target.student.value === '') {
+          event.target.student.focus();
+        } else {
+          event.target.student.value = '';
+          event.target.key.value = '';
+          event.target.key.focus();
+        }
       });
   };
   return (
@@ -125,14 +136,26 @@ export default function Event({ event, course, id }) {
       >
         <h1 className="font-medium text-3xl tracking-wider">請準備好學生證 🪪</h1>
         <form className="flex flex-col space-y-3" onSubmit={handleSubmit}>
-          <div>學號</div>
-          <input
-            type="text"
-            name="stdID"
-            className="mt-0 block w-full px-0.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-sky-800"
-            placeholder="請將學生證靠近掃描器"
-            required
-          ></input>
+          <label className="block">
+            <span className="text-gray-700">學號／學生證</span>
+            <input
+              type="text"
+              name="key"
+              className="mt-0 block w-full px-0.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-sky-800"
+              placeholder="請將學生證靠近感應器或輸入學號"
+              required
+            />
+          </label>
+
+          <label className={`block ${showStudent ? '' : 'hidden'}`}>
+            <span className="text-gray-700">學號</span>
+            <input
+              type="text"
+              name="student"
+              className="mt-0 block w-full px-0.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-sky-800"
+              placeholder="輸入學號來綁定學生證"
+            />
+          </label>
           <button
             type="submit"
             className="my-3 p-3 font-medium text-white hover:text-sky-800 rounded-md bg-sky-800 hover:bg-sky-200 transition-all ease-linear"

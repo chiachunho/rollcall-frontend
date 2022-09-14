@@ -84,7 +84,7 @@ export default function Event({ event, course, id }) {
       })
       .catch((err) => {
         setStatus(errorStatus);
-
+        setShowStudent(false);
         if (err.response) {
           if (err.response.status === 400) {
             if (err.response.data.non_field_errors) {
@@ -95,7 +95,6 @@ export default function Event({ event, course, id }) {
               } else if (err.response.data.non_field_errors.includes('EVENT_CLOSED')) {
                 setStatus(closedStatus);
               }
-              setShowStudent(false);
             }
             if (err.response.data.student) {
               setStatus(notEnrollStatus);

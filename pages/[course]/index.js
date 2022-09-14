@@ -55,6 +55,7 @@ export default function Course({ course }) {
               type="date"
               name="date"
               defaultValue={new Date().toLocaleDateString('en-CA')}
+              required
               className="
                     mt-0
                     block

@@ -1,5 +1,5 @@
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Result from '../../components/Result';
 import axiosInstance from '../../components/axiosInstance';
 import Layout from '../../layouts/Layout';
@@ -14,6 +14,7 @@ export default function Event({ event, course, id }) {
   const [records, setRecords] = useState(event.records);
   const [showStudent, setShowStudent] = useState(false);
   const { data: session } = useSession({ required: true });
+  const formRef = useRef(null);
 
   const initStatus = {
     color: 'bg-sky-800',
@@ -40,6 +41,14 @@ export default function Event({ event, course, id }) {
       setStatus(closedStatus);
     }
   }, [event.status]);
+
+  useEffect(() => {
+    if (showStudent) {
+      formRef.current.student.focus();
+    } else {
+      formRef.current.key.focus();
+    }
+  }, [showStudent]);
 
   function setStatus({ color, heading, content }) {
     setColor(color);
@@ -81,36 +90,36 @@ export default function Event({ event, course, id }) {
           content: '簽到時間：' + new Date(res.data.created_at).toLocaleString('en-US', 'GMT+8'),
         });
         setShowStudent(false);
+        event.target.key.value = '';
       })
       .catch((err) => {
-        setStatus(errorStatus);
-        setShowStudent(false);
+        let status = errorStatus;
+        let show = false;
         if (err.response) {
           if (err.response.status === 400) {
             if (err.response.data.non_field_errors) {
               if (err.response.data.non_field_errors.includes('ALREADY_EXIST')) {
-                setStatus(existStatus);
+                status = existStatus;
               } else if (err.response.data.non_field_errors.includes('NOT_ENROLL_STUDENT')) {
-                setStatus(notEnrollStatus);
+                status = notEnrollStatus;
               } else if (err.response.data.non_field_errors.includes('EVENT_CLOSED')) {
-                setStatus(closedStatus);
+                status = closedStatus;
               }
             }
             if (err.response.data.student) {
-              setStatus(notEnrollStatus);
-              setShowStudent(student === '');
+              status = notEnrollStatus;
+              show = student === '';
             }
           }
         }
+        setStatus(status);
+        setShowStudent(show);
+        if (!show) {
+          event.target.key.value = '';
+        }
       })
       .finally(() => {
-        if (!showStudent && event.target.student.value === '') {
-          event.target.student.focus();
-        } else {
-          event.target.student.value = '';
-          event.target.key.value = '';
-          event.target.key.focus();
-        }
+        event.target.student.value = '';
       });
   };
   return (
@@ -134,7 +143,7 @@ export default function Event({ event, course, id }) {
         }
       >
         <h1 className="font-medium text-3xl tracking-wider">請準備好學生證 🪪</h1>
-        <form className="flex flex-col space-y-3" onSubmit={handleSubmit}>
+        <form className="flex flex-col space-y-3" onSubmit={handleSubmit} ref={formRef}>
           <label className="block">
             <span className="text-gray-700">學號／學生證</span>
             <input
